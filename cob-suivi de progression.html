@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi de progression · COB</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--codes:#2F6B6B;--mv:#2F6B3F;--monde:#C89A2E;--mus:#E2672A;--beige:#F3EAD8;--card:#fff;--ink:#2B2420;--soft:#7A6E60;--line:rgba(43,36,32,0.12);--r:14px;--c2:#C89A2E;--c3:#E2672A;--c4:#2F6B3F;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--beige);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
+.header{background:var(--ink);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:14px;}
+.logo{width:40px;height:40px;border-radius:50%;background:conic-gradient(var(--c2),var(--mus),#A44A3F,var(--codes),var(--mv),var(--c2));display:flex;align-items:center;justify-content:center;flex:none;}
+.logo span{width:28px;height:28px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-weight:700;font-size:10px;color:#fff;letter-spacing:.02em;}
+.header h1{font-size:18px;font-weight:700;}
+.header p{font-size:11.5px;opacity:.6;margin-top:2px;}
+.header-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.btn{font-family:'Inter',sans-serif;cursor:pointer;border:none;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;}
+.btn-light{background:rgba(255,255,255,0.15);color:#fff;}
+.btn-light:hover{background:rgba(255,255,255,0.25);}
+.btn-green{background:var(--mv);color:#fff;}
+.btn-green:hover{background:#265933;}
+.wrap{max-width:1280px;margin:0 auto;padding:16px 14px 60px;display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:900px){.wrap{grid-template-columns:340px 1fr;}}
+.sidebar{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 3px 14px rgba(43,36,32,0.08);padding:18px;}
+.radar-card{grid-column:1;display:flex;flex-direction:column;gap:10px;}
+.radar-wrap{position:relative;height:270px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--soft);}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+.rings{display:flex;justify-content:space-around;}
+.ring{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.ring svg{width:70px;height:70px;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--line);stroke-width:10;}
+.ring-fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .4s ease;}
+.ring-val{font-family:'Poppins';font-weight:700;font-size:15px;}
+.ring-lbl{font-size:11px;color:var(--soft);}
+.eleve-card{display:flex;flex-direction:column;gap:8px;}
+.eleve-row{display:flex;gap:6px;}
+.eleve-row input{flex:1;padding:9px 12px;border-radius:999px;border:1.5px solid var(--line);font-size:13.5px;}
+.eleve-row input:focus{outline:none;border-color:var(--mv);}
+.eleve-tabs{display:flex;flex-wrap:wrap;gap:6px;}
+.eleve-tab{cursor:pointer;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);font-size:12.5px;font-weight:600;background:transparent;color:var(--soft);}
+.eleve-tab:hover{border-color:var(--mv);color:var(--mv);}
+.eleve-tab.active{background:var(--mv);color:#fff;border-color:var(--mv);}
+.eleve-del{background:transparent;border:none;cursor:pointer;font-size:13px;color:var(--soft);padding:2px 4px;}
+.eleve-del:hover{color:#c0392b;}
+.main{display:flex;flex-direction:column;gap:12px;}
+.corde-section{background:var(--card);border-radius:var(--r);box-shadow:0 3px 14px rgba(43,36,32,0.08);overflow:hidden;}
+.corde-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;border:none;background:transparent;cursor:pointer;text-align:left;}
+.corde-badge{width:32px;height:32px;border-radius:50%;color:#fff;font-family:'Poppins';font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none;}
+.corde-name{font-family:'Poppins';font-weight:600;font-size:15px;flex:1;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+.corde-pct{font-size:13px;font-weight:600;color:var(--soft);}
+.chevron{font-size:11px;color:var(--soft);transition:transform .2s;}
+.corde-toggle.open .chevron{transform:rotate(180deg);}
+.corde-body{display:none;padding:0 16px 16px;}
+.corde-body.open{display:block;}
+.cat-grid{display:grid;gap:12px;grid-template-columns:1fr;}
+@media(min-width:600px){.cat-grid{grid-template-columns:1fr 1fr;}}
+@media(min-width:1100px){.cat-grid{grid-template-columns:repeat(2,1fr);}}
+.cat-block{border-radius:10px;padding:14px;}
+.cat-codes{background:rgba(47,107,107,0.07);border:1.5px solid rgba(47,107,107,0.22);}
+.cat-mv{background:rgba(47,107,63,0.06);border:1.5px solid rgba(47,107,63,0.20);}
+.cat-monde{background:rgba(200,154,46,0.07);border:1.5px solid rgba(200,154,46,0.25);}
+.cat-mus{background:rgba(226,103,42,0.06);border:1.5px solid rgba(226,103,42,0.22);}
+.cat-head{font-family:'Poppins';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.cat-codes .cat-head{color:var(--codes);}
+.cat-mv .cat-head{color:var(--mv);}
+.cat-monde .cat-head{color:var(--monde);}
+.cat-mus .cat-head{color:var(--mus);}
+.subcat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);margin: 10px 0 6px;padding-top:7px;border-top:1px solid var(--line);}
+.subcat:first-of-type{margin-top:2px;padding-top:0;border-top:none;}
+.item {
+  padding: 8px 0;
+}
+.item+.item{border-top:1px solid rgba(43,36,32,0.06);}
+.item-label {
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+  hyphens: auto;
+}
+.item-ctrl{display:flex;align-items:center;gap:8px;}
+.tri-toggle{display:flex;gap:3px;flex:none;}
+.tri-btn{border:none;cursor:pointer;border-radius:999px;font-size:10.5px;font-weight:600;padding:4px 8px;font-family:'Inter',sans-serif;transition:all .15s;background:var(--line);color:var(--soft);white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 100%;}
+.tri-btn:hover{filter:brightness(.95);}
+.tri-btn.active-0{background:#e8e0d4;color:var(--soft);}
+.tri-btn.active-1{background:#E8B23D;color:#fff;}
+.tri-btn.active-2{background:var(--mv);color:#fff;}
+.cat-codes .tri-btn.active-1{background:#A8D0D0;color:var(--codes);}
+.cat-codes .tri-btn.active-2{background:var(--codes);color:#fff;}
+.cat-monde .tri-btn.active-1{background:#E8D080;color:#7a5a00;}
+.cat-monde .tri-btn.active-2{background:var(--monde);color:#fff;}
+.cat-mus .tri-btn.active-1{background:#F5C5A8;color:#8a3010;}
+.cat-mus .tri-btn.active-2{background:var(--mus);color:#fff;}
+.search-wrap{display:flex;gap:8px;flex-wrap:wrap;}
+#searchInput{flex:1;min-width:200px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--line);font-size:13.5px;background:var(--card);}
+#searchInput:focus{outline:none;border-color:var(--mv);}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<!-- Ton HTML complet (header, sidebar, main) identique -->
+
+<header class="header">
+  <div class="logo"><span>COB</span></div>
+  <div><h1>Suivi de progression</h1><p>Capoeira · objectif 4e corde adulte · Capoeira Origem do Brasil</p></div>
+  <div class="header-right">
+    <button class="btn btn-light" id="exportBtn">💾 Exporter</button>
+    <label class="btn btn-light" style="cursor:pointer">📂 Importer<input type="file" id="importInput" accept="application/json" hidden></label>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="card eleve-card">
+      <label>Élève</label>
+      <div class="eleve-row">
+        <input type="text" id="newName" placeholder="Prénom de l'élève…">
+        <button class="btn btn-green" id="addBtn">+</button>
+      </div>
+      <div class="eleve-tabs" id="eleveTabs"><p style="font-size:12px;color:var(--soft);">Ajoutez un élève pour commencer.</p></div>
+    </div>
+
+    <div class="card radar-card">
+      <h2 style="font-size:14px;margin-bottom:6px;">Vue d'ensemble</h2>
+      <div class="radar-wrap"><canvas id="radar" width="340" height="270"></canvas></div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="card rings-card">
+      <h2>Progression par corde</h2>
+      <div class="rings">
+        <div class="ring"><svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="rf2" cx="50" cy="50" r="40" style="stroke:var(--c2)"/></svg><span class="ring-val" id="rv2">0%</span><span class="ring-lbl">Corde 2</span></div>
+        <div class="ring"><svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="rf3" cx="50" cy="50" r="40" style="stroke:var(--c3)"/></svg><span class="ring-val" id="rv3">0%</span><span class="ring-lbl">Corde 3</span></div>
+        <div class="ring"><svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="rf4" cx="50" cy="50" r="40" style="stroke:var(--c4)"/></svg><span class="ring-val" id="rv4">0%</span><span class="ring-lbl">Corde 4</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+    <div class="search-wrap"><input type="search" id="searchInput" placeholder="Rechercher un pré-requis…"></div>
+    <div id="sections"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Radar Chart simple mais efficace (sans CDN)
+function drawRadar(canvas, data) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const centerX = w/2, centerY = h/2;
+  const radius = 110;
+  const labels = ['Codes', 'Mouvements', 'Monde', 'Musicalité'];
+  const angles = data.map((v,i) => i * (Math.PI*2 / 4) - Math.PI/2);
+
+  ctx.clearRect(0,0,w,h);
+
+  // Fond
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 1;
+  for(let r=1; r<=4; r++){
+    ctx.beginPath();
+    for(let i=0; i<4; i++){
+      const x = centerX + Math.cos(angles[i]) * radius * (r/4);
+      const y = centerY + Math.sin(angles[i]) * radius * (r/4);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Données
+  ctx.beginPath();
+  ctx.strokeStyle = '#2F6B3F';
+  ctx.fillStyle = 'rgba(47,107,63,0.2)';
+  ctx.lineWidth = 3;
+  data.forEach((val, i) => {
+    const x = centerX + Math.cos(angles[i]) * radius * (val/100);
+    const y = centerY + Math.sin(angles[i]) * radius * (val/100);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Points
+  data.forEach((val, i) => {
+    const x = centerX + Math.cos(angles[i]) * radius * (val/100);
+    const y = centerY + Math.sin(angles[i]) * radius * (val/100);
+    ctx.fillStyle = '#2F6B3F';
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle = '#2B2420';
+  ctx.font = '11px Poppins';
+  ctx.textAlign = 'center';
+  labels.forEach((label, i) => {
+    const x = centerX + Math.cos(angles[i]) * (radius + 25);
+    const y = centerY + Math.sin(angles[i]) * (radius + 25) + 4;
+    ctx.fillText(label, x, y);
+  });
+}
+
+
+// DONNÉES (complet)
+const ITEMS = [
+{id:"2c1",c:2,cat:"cod",sub:"Dans la roda",lbl:"Je tape dans les mains"},
+{id:"2c2",c:2,cat:"cod",sub:"Dans la roda",lbl:"Je sais comment entrer et sortir"},
+{id:"2c3",c:2,cat:"cod",sub:"Dans la roda",lbl:"Je joue dans la roda"},
+{id:"2c4",c:2,cat:"cod",sub:"Dans la roda",lbl:"Je sais que l'on joue différemment selon le toque du berimbau"},
+{id:"2c5",c:2,cat:"cod",sub:"Dans les cours",lbl:"Je m'entraîne en laissant un espace de sécurité autour de moi"},
+{id:"2c6",c:2,cat:"cod",sub:"Dans les cours",lbl:"Je crée la roda à l'appel du berimbau"},
+{id:"2m1",c:2,cat:"mv",sub:"Les bases",lbl:"Je reconnais la basa de frente, la cadeira et la basa paralela et je connais leurs noms"},
+{id:"2m2",c:2,cat:"mv",sub:"Les esquives",lbl:"Je connais au moins 5 mouvements débutant"},
+{id:"2m3",c:2,cat:"mv",sub:"Les coups portés",lbl:"Je connais au moins 6 mouvements débutant"},
+{id:"2m4",c:2,cat:"mv",sub:"Les déplacements",lbl:"Je sais faire la ginga et me déplacer dans le jeu"},
+{id:"2m5",c:2,cat:"mv",sub:"Les acrobatiques",lbl:"Je connais au moins 3 acrobatiques débutant"},
+{id:"2m6",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Esquiva na cadeira"},
+{id:"2m7",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Esquiva de frente"},
+{id:"2m8",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Esquiva de lado"},
+{id:"2m9",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Esquiva invertida"},
+{id:"2m10",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Negativa"},
+{id:"2m11",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Rolê"},
+{id:"2m12",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Cocorinha"},
+{id:"2m13",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Queda de quatre/três"},
+{id:"2m14",c:2,cat:"mv",sub:"Esquives débutant",lbl:"Esquiva lateral"},
+{id:"2m15",c:2,cat:"mv",sub:"Coups débutant",lbl:"Meia-lua de frente"},
+{id:"2m16",c:2,cat:"mv",sub:"Coups débutant",lbl:"Bênção"},
+{id:"2m17",c:2,cat:"mv",sub:"Coups débutant",lbl:"Martelo"},
+{id:"2m18",c:2,cat:"mv",sub:"Coups débutant",lbl:"Chapa"},
+{id:"2m19",c:2,cat:"mv",sub:"Coups débutant",lbl:"Queixada"},
+{id:"2m20",c:2,cat:"mv",sub:"Coups débutant",lbl:"Armada"},
+{id:"2m21",c:2,cat:"mv",sub:"Coups débutant",lbl:"Meia-lua de Compasso"},
+{id:"2m22",c:2,cat:"mv",sub:"Coups débutant",lbl:"Rabo de arraia"},
+{id:"2m23",c:2,cat:"mv",sub:"Coups débutant",lbl:"Calcanheira"},
+{id:"2m24",c:2,cat:"mv",sub:"Coups débutant",lbl:"Ponteiro"},
+{id:"2m25",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Aúzinho"},
+{id:"2m26",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Aú"},
+{id:"2m27",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Ponte"},
+{id:"2m28",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Bananeira"},
+{id:"2m29",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Bananeira com cabeça"},
+{id:"2m30",c:2,cat:"mv",sub:"Acrobatiques débutant",lbl:"Aú com tête"},
+{id:"2mo1",c:2,cat:"mon",sub:"Le COB",lbl:"Je sais qui sont les enseignants du COB et comment les contacter"},
+{id:"2mo2",c:2,cat:"mon",sub:"Le COB",lbl:"Je sais où et quand je peux m'entraîner"},
+{id:"2mo3",c:2,cat:"mon",sub:"Le COB",lbl:"Je reconnais les grades du COB"},
+{id:"2mo4",c:2,cat:"mon",sub:"Le COB",lbl:"Je fabrique ma corde"},
+{id:"2mo5",c:2,cat:"mon",sub:"Le COB",lbl:"Je reçois les infos du COB (mail, Facebook, Whatsapp)"},
+{id:"2mo6",c:2,cat:"mon",sub:"À l'extérieur",lbl:"Je sais que je peux aller à des événements extérieurs"},
+{id:"2mo7",c:2,cat:"mon",sub:"La capoeira",lbl:"Je sais que la capoeira s'est développée au Brésil sur des origines diverses, surtout Africaines, et que l'on chante en portugais brésilien"},
+{id:"2mo8",c:2,cat:"mon",sub:"La capoeira",lbl:"J'ai entendu parler du Maculêlê"},
+{id:"2mu1",c:2,cat:"mus",sub:"Chants",lbl:"Je sais chanter les refrains d'au moins 5 chants différents"},
+{id:"2mu2",c:2,cat:"mus",sub:"Instruments",lbl:"J'apprends le pandeiro, le berimbau et l'atabaque"},
+{id:"2mu3",c:2,cat:"mus",sub:"Roda",lbl:"Je tape dans les mains dans la roda et reprends les refrains des chants"},
+{id:"3c1",c:3,cat:"cod",sub:"Dans la roda",lbl:"Je reconnais toque angola, são bento pequeno et são bento grande de angola et j'adapte mon jeu au toque"},
+{id:"3c2",c:3,cat:"cod",sub:"Dans la roda",lbl:"Je coupe et achète un jeu en sécurité"},
+{id:"3m1",c:3,cat:"mv",sub:"Les esquives",lbl:"Je connais les mouvements débutant + au moins 5 mouvements intermédiaire"},
+{id:"3m2",c:3,cat:"mv",sub:"Les coups portés",lbl:"Je connais les mouvements débutant + au moins 4 mouvements intermédiaire"},
+{id:"3m3",c:3,cat:"mv",sub:"Les acrobatiques",lbl:"Je connais les mouvements débutant + au moins 5 mouvements intermédiaire"},
+{id:"3m4",c:3,cat:"mv",sub:"Les déséquilibrants",lbl:"Je sais recevoir un déséquilibrant en sécurité"},
+{id:"3m5",c:3,cat:"mv",sub:"Maculêlê",lbl:"Je connais au moins 3 mouvements"},
+{id:"3m6",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Esquiva Agachado"},
+{id:"3m7",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Queda de rins"},
+{id:"3m8",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Pêndulo"},
+{id:"3m9",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Bote"},
+{id:"3m10",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Resistência"},
+{id:"3m11",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Rolê com tête"},
+{id:"3m12",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Passagem das costas"},
+{id:"3m13",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Negativa de angola"},
+{id:"3m14",c:3,cat:"mv",sub:"Esquives intermédiaire",lbl:"Negativa invertida"},
+{id:"3m15",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Martelo rodado"},
+{id:"3m16",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Martelo rodado sem main"},
+{id:"3m17",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Gancho"},
+{id:"3m18",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Chapa rodado"},
+{id:"3m19",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Aú pisão"},
+{id:"3m20",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Chapéu de couro"},
+{id:"3m21",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Meia lua de frente no sol"},
+{id:"3m22",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Queixada no sol"},
+{id:"3m23",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Armada no sol"},
+{id:"3m24",c:3,cat:"mv",sub:"Coups intermédiaire",lbl:"Martelo no sol"},
+{id:"3m25",c:3,cat:"mv",sub:"Acrobatiques intermédiaire",lbl:"Aú com uma main"},
+{id:"3m26",c:3,cat:"mv",sub:"Acrobatiques intermédiaire",lbl:"Queda de rins (acro)"},
+{id:"3m27",c:3,cat:"mv",sub:"Acrobatiques intermédiaire",lbl:"Beija Flor"},
+{id:"3m28",c:3,cat:"mv",sub:"Acrobatiques intermédiaire",lbl:"Aú de frente"},
+{id:"3m29",c:3,cat:"mv",sub:"Acrobatiques intermédiaire",lbl:"Corta capim"},
+{id:"3mo1",c:3,cat:"mon",sub:"Le COB",lbl:"Je connais les origines de la capoeira de mon professeur"},
+{id:"3mo2",c:3,cat:"mon",sub:"Le COB",lbl:"Je fabrique ma corde en autonomie"},
+{id:"3mo3",c:3,cat:"mon",sub:"La capoeira",lbl:"Je connais les 2 grands courants Angola et Regional, Pastinha et Bimba"},
+{id:"3mo4",c:3,cat:"mon",sub:"La capoeira",lbl:"Je connais les noms d'au moins 3 groupes extérieurs"},
+{id:"3mu1",c:3,cat:"mus",sub:"Chants",lbl:"Je sais chanter les refrains d'au moins 15 chants différents"},
+{id:"3mu2",c:3,cat:"mus",sub:"Chants",lbl:"Je reconnais une ladainha et sais chanter le refrain de la chula qui suit"},
+{id:"3mu3",c:3,cat:"mus",sub:"Instruments",lbl:"Je sais jouer un toque au pandeiro"},
+{id:"3mu4",c:3,cat:"mus",sub:"Instruments",lbl:"Je sais jouer un toque au berimbau"},
+{id:"3mu5",c:3,cat:"mus",sub:"Instruments",lbl:"Je sais jouer un toque à l'atabaque"},
+{id:"3mu6",c:3,cat:"mus",sub:"Instruments",lbl:"Je sais jouer de l'agôgô"},
+{id:"3mu7",c:3,cat:"mus",sub:"Instruments",lbl:"Je sais jouer du reco-reco"},
+{id:"4c1",c:4,cat:"cod",sub:"Dans la roda",lbl:"Je reconnais les chamadas"},
+{id:"4c2",c:4,cat:"cod",sub:"Dans la roda",lbl:"Je connais des codes d'autres groupes"},
+{id:"4m1",c:4,cat:"mv",sub:"Les esquives",lbl:"Je connais les mouvements intermédiaire + 2 mouvements avancé"},
+{id:"4m2",c:4,cat:"mv",sub:"Les coups portés",lbl:"Je connais les mouvements intermédiaire + 3 mouvements avancé"},
+{id:"4m3",c:4,cat:"mv",sub:"Les déséquilibrants",lbl:"Je connais au moins 3 déséquilibrants"},
+{id:"4m4",c:4,cat:"mv",sub:"Les acrobatiques",lbl:"Je connais les mouvements intermédiaire + 2 mouvements avancé"},
+{id:"4m5",c:4,cat:"mv",sub:"Les chamadas",lbl:"Je connais au moins 2 chamadas"},
+{id:"4m6",c:4,cat:"mv",sub:"Maculêlê",lbl:"Je connais au moins 5 mouvements"},
+{id:"4m7",c:4,cat:"mv",sub:"Maculêlê",lbl:"Je reconnais le toque et j'ai déjà pratiqué"},
+{id:"4m8",c:4,cat:"mv",sub:"Les acrobatiques (seuil)",lbl:"Je connais au moins 3 mouvements"},
+{id:"4m9",c:4,cat:"mv",sub:"Esquives avancé",lbl:"Puxeta"},
+{id:"4m10",c:4,cat:"mv",sub:"Esquives avancé",lbl:"Bochecho"},
+{id:"4m11",c:4,cat:"mv",sub:"Esquives avancé",lbl:"Resistência com joelhos"},
+{id:"4m12",c:4,cat:"mv",sub:"Coups avancé",lbl:"Meia lua de compasso sem main"},
+{id:"4m13",c:4,cat:"mv",sub:"Coups avancé",lbl:"Compasso"},
+{id:"4m14",c:4,cat:"mv",sub:"Coups avancé",lbl:"Martelo com main"},
+{id:"4m15",c:4,cat:"mv",sub:"Coups avancé",lbl:"Beija flor"},
+{id:"4m16",c:4,cat:"mv",sub:"Coups avancé",lbl:"Escorpião"},
+{id:"4m17",c:4,cat:"mv",sub:"Coups avancé",lbl:"S-dobrado"},
+{id:"4m18",c:4,cat:"mv",sub:"Coups avancé",lbl:"Meia Lua de Compasso no sol"},
+{id:"4m19",c:4,cat:"mv",sub:"Coups avancé",lbl:"Chapa no sol"},
+{id:"4m20",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Banda de frente"},
+{id:"4m21",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Banda de costas"},
+{id:"4m22",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Vingativa"},
+{id:"4m23",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Rasteira de sol"},
+{id:"4m24",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Rasteira de costas"},
+{id:"4m25",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Tesoura de costas"},
+{id:"4m26",c:4,cat:"mv",sub:"Déséquilibrants",lbl:"Tesoura de frente"},
+{id:"4m27",c:4,cat:"mv",sub:"Acros avancé",lbl:"Pião de main"},
+{id:"4m28",c:4,cat:"mv",sub:"Acros avancé",lbl:"Macaco"},
+{id:"4m29",c:4,cat:"mv",sub:"Acros avancé",lbl:"Aú sem main"},
+{id:"4m30",c:4,cat:"mv",sub:"Acros avancé",lbl:"Aú de colonne"},
+{id:"4m31",c:4,cat:"mv",sub:"Chamadas",lbl:"Agachamento"},
+{id:"4m32",c:4,cat:"mv",sub:"Chamadas",lbl:"Volta do monde"},
+{id:"4m33",c:4,cat:"mv",sub:"Chamadas",lbl:"Aperto de main"},
+{id:"4m34",c:4,cat:"mv",sub:"Chamadas",lbl:"Chamada da palma de frente"},
+{id:"4m35",c:4,cat:"mv",sub:"Chamadas",lbl:"Chamada ouverte de front"},
+{id:"4m36",c:4,cat:"mv",sub:"Chamadas",lbl:"Chamada de costas"},
+{id:"4m37",c:4,cat:"mv",sub:"Chamadas",lbl:"Chamada de tête"},
+{id:"4m38",c:4,cat:"mv",sub:"Chamadas",lbl:"Chamada de sapinho"},
+{id:"4mo1",c:4,cat:"mon",sub:"Le COB",lbl:"Je peux apprendre à quelqu'un à fabriquer sa corde"},
+{id:"4mu1",c:4,cat:"mus",sub:"Chants",lbl:"Je sais chanter 2 chansons entières et peux jouer d'un instrument en même temps"},
+{id:"4mu2",c:4,cat:"mus",sub:"Instruments",lbl:"Je sais jouer une variante au pandeiro"},
+{id:"4mu3",c:4,cat:"mus",sub:"Instruments",lbl:"Je sais suivre le toque du berimbau gunga sur les toques angola et são bento pequeno"},
+{id:"4mu4",c:4,cat:"mus",sub:"Instruments",lbl:"Je sais chanter les refrains en même temps que je joue de l'atabaque"},
+{id:"4mu5",c:4,cat:"mus",sub:"Instruments",lbl:"Je sais chanter les refrains en même temps que je joue de l'agôgô ou du reco-reco"},
+{id:"4mu6",c:4,cat:"mus",sub:"Instruments",lbl:"Je sais donner les noms d'autres toques"}
+];
+
+const CATS = {
+  cod:{ label:"Les Codes", icon:"⚖️", color:"#2F6B6B", cls:"cat-codes" },
+  mv: { label:"Les Mouvements", icon:"🥋", color:"#2F6B3F", cls:"cat-mv" },
+  mon:{ label:"Le Monde de la Capoeira",icon:"🌍", color:"#C89A2E", cls:"cat-monde" },
+  mus:{ label:"Musicalité", icon:"🎵", color:"#E2672A", cls:"cat-mus" }
+};
+
+const CAT_ORDER = ['cod','mv','mon','mus'];
+const CCOLORS = {2:"#C89A2E",3:"#E2672A",4:"#2F6B3F"};
+const CIRC = 2*Math.PI*40;
+
+let students = [], current = null, chart = null;
+
+function getVals(){ return current ? students.find(s=>s.id===current)?.vals ?? {} : {}; }
+function save(){ try{localStorage.setItem("cob_prog",JSON.stringify(students));}catch(e){} }
+function load(){ try{const r=localStorage.getItem("cob_prog");if(r)students=JSON.parse(r);}catch(e){} }
+
+function stateToScore(v){return v===2?100:v===1?50:0;}
+function catAvgs(vals){
+  const t={},c={};CAT_ORDER.forEach(k=>{t[k]=0;c[k]=0;});
+  ITEMS.forEach(it=>{t[it.cat]+=stateToScore(vals[it.id]||0);c[it.cat]++;});
+  const o={};CAT_ORDER.forEach(k=>{o[k]=c[k]?Math.round(t[k]/c[k]):0;});return o;
+}
+function cordeAvg(vals,cd){const it=ITEMS.filter(i=>i.c===cd);return it.length?Math.round(it.reduce((s,i)=>s+stateToScore(vals[i.id]||0),0)/it.length):0;}
+
+function initChart(){
+  const canvas = document.getElementById("radar");
+  if(!canvas) return;
+  chart = {update:()=>console.log("Radar mis à jour")};
+  document.getElementById("legend").innerHTML = CAT_ORDER.map(k=>`<span class="leg"><span class="leg-dot" style="background:${CATS[k].color}"></span>${CATS[k].label}</span>`).join("");
+}
+
+function updateRing(n,val){
+  const el=document.getElementById("rf"+n);
+  if(el){el.style.strokeDasharray=CIRC;el.style.strokeDashoffset=CIRC*(1-val/100);document.getElementById("rv"+n).textContent=val+"%";}
+}
+function updateAggregates(){
+  const vals=getVals(),ca=catAvgs(vals);
+  if(chart) chart.update();
+  [2,3,4].forEach(c=>updateRing(c,cordeAvg(vals,c)));
+}
+
+function renderSections(){
+  const wrap = document.getElementById("sections");
+  const vals = getVals();
+  let html = "";
+  [2,3,4].forEach(corde => {
+    const items = ITEMS.filter(i => i.c === corde);
+    html += `<div class="corde-section" data-corde="${corde}">
+      <button class="corde-toggle${corde===2?" open":""}" data-tog="${corde}">
+        <span class="corde-badge" style="background:${CCOLORS[corde]}">C${corde}</span>
+        <span class="corde-name">Corde ${corde}</span>
+        <span class="corde-pct" id="cp${corde}">0%</span>
+        <span class="chevron">▾</span>
+      </button>
+      <div class="corde-body${corde===2?" open":""}" id="cb${corde}">
+        <div class="cat-grid" style="margin-top:12px;">`;
+    CAT_ORDER.forEach(catKey => {
+      const catItems = items.filter(i => i.cat === catKey);
+      if(!catItems.length) return;
+      const subs = [...new Set(catItems.map(i => i.sub))];
+      html += `<div class="cat-block ${CATS[catKey].cls}">
+        <div class="cat-head">${CATS[catKey].icon} ${CATS[catKey].label}</div>`;
+      subs.forEach(sub => {
+        html += `<div class="subcat">${sub}</div>`;
+        catItems.filter(i => i.sub === sub).forEach(it => {
+          const v = vals[it.id] || 0;
+          html += `<div class="item" data-id="${it.id}">
+            <span class="item-label" style="word-break:break-word;">${it.lbl}</span>
+            <div class="item-ctrl">
+              <div class="tri-toggle">
+                <button class="tri-btn${v===0?" active-0":""}" data-id="${it.id}" data-v="0">✗ Non acquis</button>
+                <button class="tri-btn${v===1?" active-1":""}" data-id="${it.id}" data-v="1">⟳ En cours</button>
+                <button class="tri-btn${v===2?" active-2":""}" data-id="${it.id}" data-v="2">✓ Acquis</button>
+              </div>
+            </div>
+          </div>`;
+        });
+      });
+      html += `</div>`;
+    });
+    html += `</div></div></div>`;
+  });
+  wrap.innerHTML = html;
+  updateCordePcts();
+}
+
+function updateCordePcts(){
+  const vals = getVals();
+  [2,3,4].forEach(c => {
+    const el = document.getElementById("cp"+c);
+    if(el) el.textContent = cordeAvg(vals,c) + "%";
+  });
+}
+
+function refreshButtons(){
+  const vals = getVals();
+  document.querySelectorAll(".tri-btn").forEach(btn => {
+    const id = btn.dataset.id;
+    const v = parseInt(btn.dataset.v);
+    const cur = vals[id] || 0;
+    btn.className = `tri-btn${cur === v ? " active-" + v : ""}`;
+  });
+  updateCordePcts();
+}
+
+function renderTabs(){
+  const wrap = document.getElementById("eleveTabs");
+  if(!students.length){
+    wrap.innerHTML = '<p style="font-size:12px;color:var(--soft);">Ajoutez un élève pour commencer.</p>';
+    return;
+  }
+  wrap.innerHTML = students.map(s =>
+    `<span style="display:inline-flex;align-items:center;gap:2px;">
+      <button class="eleve-tab${s.id===current?" active":""}" data-sid="${s.id}">${s.name}</button>
+      <button class="eleve-del" data-del="${s.id}" title="Supprimer">✕</button>
+    </span>`
+  ).join("");
+}
+
+function selectStudent(id){
+  current = id;
+  renderTabs();
+  renderSections();
+  updateAggregates();
+}
+
+// Events
+document.getElementById("addBtn").addEventListener("click", () => {
+  const name = document.getElementById("newName").value.trim();
+  if(!name) return;
+  const id = "e" + Date.now();
+  students.push({id, name, vals:{}});
+  save();
+  document.getElementById("newName").value = "";
+  selectStudent(id);
+  toast(name + " ajouté·e");
+});
+
+document.getElementById("eleveTabs").addEventListener("click", e => {
+  const sid = e.target.closest("[data-sid]")?.dataset.sid;
+  const del = e.target.closest("[data-del]")?.dataset.del;
+  if(sid) selectStudent(sid);
+  if(del){
+    if(confirm("Supprimer cet élève ?")){
+      students = students.filter(x => x.id !== del);
+      save();
+      if(current === del) current = students[0]?.id || null;
+      if(current) selectStudent(current);
+      else renderTabs();
+    }
+  }
+});
+
+document.getElementById("sections").addEventListener("click", e => {
+  const tog = e.target.closest(".corde-toggle");
+  if(tog){
+    const c = tog.dataset.tog;
+    document.getElementById("cb"+c).classList.toggle("open");
+    tog.classList.toggle("open");
+    return;
+  }
+  const btn = e.target.closest(".tri-btn");
+  if(btn && current){
+    const id = btn.dataset.id;
+    const v = parseInt(btn.dataset.v);
+    const s = students.find(x=>x.id===current);
+    if(s) s.vals[id] = v;
+    save();
+    refreshButtons();
+    updateAggregates();
+  }
+});
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll(".item").forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+});
+
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+
+function updateAggregates(){
+  const vals = getVals();
+  const ca = catAvgs(vals);
+  const data = CAT_ORDER.map(k => ca[k]);
+  const canvas = document.getElementById("radar");
+  if(canvas) drawRadar(canvas, data);
+  [2,3,4].forEach(c => updateRing(c, cordeAvg(vals,c)));
+}
+
+// INIT
+load();
+updateAggregates(); // premier affichage
+if(students.length){
+  current = students[0].id;
+  renderTabs();
+  renderSections();
+  updateAggregates();
+} else {
+  renderTabs();
+}
+</script>
+</body>
+</html>
