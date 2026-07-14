@@ -26,7 +26,7 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
 .sidebar{display:flex;flex-direction:column;gap:12px;}
 .card{background:var(--card);border-radius:var(--r);box-shadow:0 3px 14px rgba(43,36,32,0.08);padding:18px;}
 .radar-card{grid-column:1;display:flex;flex-direction:column;gap:10px;}
-.radar-wrap{position:relative;height:270px;}
+.radar-wrap{position:relative;height:320px;}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;}
 .leg{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--soft);}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex:none;}
@@ -127,7 +127,7 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
 
     <div class="card radar-card">
       <h2 style="font-size:14px;margin-bottom:6px;">Vue d'ensemble</h2>
-      <div class="radar-wrap"><canvas id="radar" width="340" height="270"></canvas></div>
+      <div class="radar-wrap"><canvas id="radar" width="340" height="320"></canvas></div>
       <div class="legend" id="legend"></div>
     </div>
 
@@ -156,6 +156,7 @@ function drawRadar(canvas, data) {
   const w = canvas.width, h = canvas.height;
   const centerX = w/2, centerY = h/2;
   const radius = 110;
+  const labelOffset = 38;
   const labels = ['Codes', 'Mouvements', 'Monde', 'Musicalité'];
   const angles = data.map((v,i) => i * (Math.PI*2 / 4) - Math.PI/2);
 
@@ -201,12 +202,20 @@ function drawRadar(canvas, data) {
 
   // Labels
   ctx.fillStyle = '#2B2420';
-  ctx.font = '11px Poppins';
-  ctx.textAlign = 'center';
+  ctx.font = 'bold 12px Poppins, sans-serif';
   labels.forEach((label, i) => {
-    const x = centerX + Math.cos(angles[i]) * (radius + 25);
-    const y = centerY + Math.sin(angles[i]) * (radius + 25) + 4;
-    ctx.fillText(label, x, y);
+    const lx = centerX + Math.cos(angles[i]) * (radius + labelOffset);
+    const ly = centerY + Math.sin(angles[i]) * (radius + labelOffset);
+    // align selon la direction
+    const angle = angles[i];
+    if(Math.abs(Math.cos(angle)) < 0.1) {
+      ctx.textAlign = 'center';
+    } else {
+      ctx.textAlign = Math.cos(angle) > 0 ? 'left' : 'right';
+    }
+    ctx.textBaseline = Math.abs(Math.sin(angle)) < 0.1 ? 'middle'
+                       : Math.sin(angle) > 0 ? 'top' : 'bottom';
+    ctx.fillText(label, lx, ly);
   });
 }
 
