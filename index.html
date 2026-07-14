@@ -549,6 +549,43 @@ function updateAggregates(){
   [2,3,4].forEach(c => updateRing(c, cordeAvg(vals,c)));
 }
 
+// EXPORT / IMPORT
+document.getElementById("exportBtn").addEventListener("click", () => {
+  if(!students.length){ toast("Aucun élève à exporter"); return; }
+  const data = JSON.stringify(students, null, 2);
+  const blob = new Blob([data], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `cob-progression-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Export téléchargé ✓");
+});
+
+document.getElementById("importInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!Array.isArray(data)) throw new Error("Format invalide");
+      students = data;
+      save();
+      current = students[0]?.id || null;
+      if(current){ renderTabs(); renderSections(); updateAggregates(); }
+      else renderTabs();
+      toast(`${students.length} élève(s) importé(s) ✓`);
+    } catch(err) {
+      toast("❌ Fichier invalide");
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+});
+
 // INIT
 load();
 updateAggregates(); // premier affichage
