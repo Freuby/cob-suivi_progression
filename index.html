@@ -26,7 +26,8 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
 .sidebar{display:flex;flex-direction:column;gap:12px;}
 .card{background:var(--card);border-radius:var(--r);box-shadow:0 3px 14px rgba(43,36,32,0.08);padding:18px;}
 .radar-card{grid-column:1;display:flex;flex-direction:column;gap:10px;}
-.radar-wrap{position:relative;height:340px;display:flex;justify-content:center;}
+.radar-wrap{position:relative;height:auto;display:flex;justify-content:center;}
+.radar-wrap canvas{width:100%;height:auto;display:block;}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;}
 .leg{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--soft);}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex:none;}
@@ -127,7 +128,7 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
 
     <div class="card radar-card">
       <h2 style="font-size:14px;margin-bottom:6px;">Vue d'ensemble</h2>
-      <div class="radar-wrap"><canvas id="radar" width="400" height="340"></canvas></div>
+      <div class="radar-wrap"><canvas id="radar"></canvas></div>
       <div class="legend" id="legend"></div>
     </div>
 
@@ -152,11 +153,22 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
 <script>
 // Radar Chart simple mais efficace (sans CDN)
 function drawRadar(canvas, data) {
+  // Taille responsive : on prend la largeur du conteneur
+  const dpr = window.devicePixelRatio || 1;
+  const size = canvas.parentElement.clientWidth || 300;
+  canvas.width  = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width  = size + 'px';
+  canvas.style.height = size + 'px';
+
   const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  const centerX = w/2, centerY = h/2;
-  const radius = 90;
-  const labelOffset = 30;
+  ctx.scale(dpr, dpr);
+
+  const w = size, h = size;
+  const centerX = w / 2, centerY = h / 2;
+  const padding = 52; // espace pour les labels
+  const radius = size / 2 - padding;
+  const labelOffset = 16;
   const labels = ['Codes', 'Mouvements', 'Monde', 'Musicalité'];
   const angles = data.map((v,i) => i * (Math.PI*2 / 4) - Math.PI/2);
 
@@ -594,6 +606,12 @@ document.getElementById("importInput").addEventListener("change", e => {
   };
   reader.readAsText(file);
 });
+
+// Redessiner le radar quand la sidebar change de taille
+const radarCanvas = document.getElementById("radar");
+if(radarCanvas && window.ResizeObserver) {
+  new ResizeObserver(() => updateAggregates()).observe(radarCanvas.parentElement);
+}
 
 // INIT
 load();
